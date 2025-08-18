@@ -1,0 +1,18 @@
+---
+- name: Configure bash prompt
+  hosts: all
+  become: true
+  tasks:
+    - name: Set PS1 for normal user
+      lineinfile:
+        path: "/home/{{ ansible_user }}/.bashrc"
+        line: 'export PS1="[\u@\h \W ({{ group_names[0] }})]$ "'
+        create: yes
+      when: ansible_user != "root"
+
+    - name: Set PS1 for root user
+      lineinfile:
+        path: "/root/.bashrc"
+        line: 'export PS1="[\u@\h \W ({{ group_names[0] }}) - ROOT]# "'
+        create: yes
+      when: ansible_user == "root"
