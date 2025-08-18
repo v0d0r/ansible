@@ -1,5 +1,5 @@
 ---
-- name: Configure dynamic bash prompt
+- name: Configure dynamic bash prompt for all users
   hosts: all
   become: yes
 
@@ -20,5 +20,16 @@
         line: '[[ $- == *i* ]] && [ -f /etc/profile.d/colorprompt.sh ] && source /etc/profile.d/colorprompt.sh'
         state: present
         create: yes
+        insertafter: EOF
       become: true
       become_user: root
+
+    - name: Debug - list /etc/profile.d to confirm file exists
+      command: ls -alh /etc/profile.d/
+      register: profile_d_listing
+      become: true
+      become_user: root
+
+    - name: Show /etc/profile.d contents
+      debug:
+        var: profile_d_listing.stdout_lines
