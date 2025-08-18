@@ -11,6 +11,8 @@
         owner: root
         group: root
         mode: '0644'
+      become: true
+      become_user: root
 
     - name: Ensure colorprompt is sourced in /etc/bash.bashrc
       lineinfile:
@@ -19,6 +21,8 @@
         state: present
         create: yes
         insertafter: EOF
+      become: true
+      become_user: root
 
     - name: Ensure colorprompt is sourced in /etc/skel/.bashrc
       lineinfile:
@@ -31,11 +35,17 @@
         state: present
         create: yes
         insertafter: EOF
+      become: true
+      become_user: root
 
     - name: Debug - list /etc/profile.d to confirm file exists
       command: ls -alh /etc/profile.d/
       register: profile_d_listing
+      become: true
+      become_user: root
 
     - name: Show /etc/profile.d contents
       debug:
         var: profile_d_listing.stdout_lines
+      become: true
+      become_user: root
