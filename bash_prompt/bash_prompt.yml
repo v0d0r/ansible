@@ -4,6 +4,16 @@
   become: yes
 
   tasks:
+    - name: Check /etc/profile.d/ contents and permissions
+      command: ls -alh /etc/profile.d/
+      become: true
+      become_user: root
+      register: profile_d_list
+
+    - name: Show /etc/profile.d/ listing
+      debug:
+        var: profile_d_list.stdout_lines
+
     - name: Install PS1 script for all users
       template:
         src: colorprompt.sh.j2
@@ -11,3 +21,5 @@
         owner: root
         group: root
         mode: '0644'
+      become: true
+      become_user: root
