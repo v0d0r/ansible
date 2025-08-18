@@ -11,24 +11,30 @@
         owner: root
         group: root
         mode: '0644'
-      become: true
-      become_user: root
 
-    - name: Ensure colorprompt is sourced in all interactive shells
+    - name: Ensure colorprompt is sourced in /etc/bash.bashrc
       lineinfile:
         path: /etc/bash.bashrc
         line: '[[ $- == *i* ]] && [ -f /etc/profile.d/colorprompt.sh ] && source /etc/profile.d/colorprompt.sh'
         state: present
         create: yes
         insertafter: EOF
-      become: true
-      become_user: root
+
+    - name: Ensure colorprompt is sourced in /etc/skel/.bashrc
+      lineinfile:
+        path: /etc/skel/.bashrc
+        line: |
+          # at the end of /etc/skel/.bashrc
+          if [ -f /etc/profile.d/colorprompt.sh ]; then
+              . /etc/profile.d/colorprompt.sh
+          fi
+        state: present
+        create: yes
+        insertafter: EOF
 
     - name: Debug - list /etc/profile.d to confirm file exists
       command: ls -alh /etc/profile.d/
       register: profile_d_listing
-      become: true
-      become_user: root
 
     - name: Show /etc/profile.d contents
       debug:
