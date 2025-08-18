@@ -1,0 +1,46 @@
+# Dynamic PS1 (installed by Ansible)
+# Applies only for interactive shells
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+RESET="\[\e[0m\]"
+
+# Base colors
+GREY="\[\e[0;37m\]"              # standard grey (hostname, path, brackets)
+ENV_RED="\[\e[31m\]"             # PROD
+ENV_ORANGE="\[\e[38;5;208m\]"    # STAGE
+ENV_GREEN="\[\e[32m\]"           # DEV
+
+# User colors
+USER_PASTEL="\[\e[38;5;110m\]"   # normal user (soft pastel)
+USER_ROOT="\[\e[38;5;167m\]"     # root (subtle red, not bright)
+
+# Detect env from hostname (expects .prod., .stage., .dev.)
+_lc_host="$(printf '%s' "$HOSTNAME" | tr '[:upper:]' '[:lower:]')"
+if printf '%s' "$_lc_host" | grep -q '\.prod\.'; then
+  ENV_LABEL="PROD"; ENV_COLOR="$ENV_RED"
+elif printf '%s' "$_lc_host" | grep -q '\.stage\.'; then
+  ENV_LABEL="STAGE"; ENV_COLOR="$ENV_ORANGE"
+elif printf '%s' "$_lc_host" | grep -q '\.dev\.'; then
+  ENV_LABEL="DEV"; ENV_COLOR="$ENV_GREEN"
+else
+  ENV_LABEL="UNKNOWN"; ENV_COLOR="$GREY"
+fi
+
+# Username color and prompt char
+if [ "$EUID" -eq 0 ]; then
+  _USER_COLOR="$USER_ROOT"
+  _PROMPT_CHAR="#"
+else
+  _USER_COLOR="$USER_PASTEL"
+  _PROMPT_CHAR="$"
+fi
+
+# Build PS1:
+# e.g.  PROD [root@ut-monitoring /etc]# 
+# - ENV label colored
+# - username colored (root vs user)
+# - hostname and path in grey
+export PS1="${ENV_COLOR}${ENV_LABEL}${RESET} ${GREY}[${RESET}${_USER_COLOR}\u${RESET}${GREY}@\h \w]${RESET}${GREY}${_PROMPT_CHAR} ${RESET}"
