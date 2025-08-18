@@ -1,0 +1,13 @@
+---
+- name: Configure dynamic bash prompt
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install PS1 script for all users
+      template:
+        src: colorprompt.sh.j2
+        dest: /etc/profile.d/colorprompt.sh
+        owner: root
+        group: root
+        mode: '0644'
