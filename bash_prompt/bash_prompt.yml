@@ -1,7 +1,9 @@
 ---
 - name: Set bash prompt on servers
   hosts: all
-  become: yes
+  become: true
+  become_user: root
+
   vars:
     bash_prompt: '\u@\h:\w\$ '
 
