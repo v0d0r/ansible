@@ -35,11 +35,10 @@
 
     - name: Ensure existing users source /etc/bash.bashrc
       lineinfile:
-        path: "{{ item }}/.bashrc"
+        path: "{{ item }}"
         line: '[ -f /etc/bash.bashrc ] && . /etc/bash.bashrc'
         state: present
         insertafter: BOF
-        create: yes
       with_fileglob:
         - /home/*/.bashrc
       loop_control:
