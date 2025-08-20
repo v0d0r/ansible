@@ -1,67 +1,26 @@
 ---
-- name: Configure dynamic bash prompt for all users
+- name: Set bash prompt on servers
   hosts: all
   become: yes
-  become_user: root
+  vars:
+    bash_prompt: '\u@\h:\w\$ '
 
   tasks:
-    - name: Install PS1 script for all users
-      template:
-        src: colorprompt.sh.j2
-        dest: /etc/profile.d/colorprompt.sh
-        owner: root
-        group: root
-        mode: '0644'
 
-    - name: Ensure colorprompt is sourced in /etc/bash.bashrc
+    - name: Update /etc/profile with custom bash prompt if not already set
       lineinfile:
-        path: /etc/bash.bashrc
-        line: '[[ $- == *i* ]] && [ -f /etc/profile.d/colorprompt.sh ] && source /etc/profile.d/colorprompt.sh'
+        path: /etc/profile
+        regexp: '^export PS1='
+        line: "export PS1='{{ bash_prompt }}'"
         state: present
         create: yes
-        insertafter: EOF
+        backrefs: yes
 
-    - name: Ensure colorprompt is sourced in /etc/skel/.bashrc
+    - name: Update /etc/skel/.bashrc with custom bash prompt if not already set
       lineinfile:
         path: /etc/skel/.bashrc
-        line: |
-          # at the end of /etc/skel/.bashrc
-          if [ -f /etc/profile.d/colorprompt.sh ]; then
-              . /etc/profile.d/colorprompt.sh
-          fi
+        regexp: '^export PS1='
+        line: "export PS1='{{ bash_prompt }}'"
         state: present
         create: yes
-        insertafter: EOF
-
-    - name: Find existing users' .bashrc files (recursive)
-      find:
-        paths: /home
-        patterns: ".bashrc"
-        file_type: file
-        recurse: yes
-        follow: yes
-      register: bashrc_files
-
-    - name: Debug - show found .bashrc files
-      debug:
-        var: bashrc_files.files
-
-    - name: Ensure existing users source /etc/bash.bashrc
-      lineinfile:
-        path: "{{ item.path }}"
-        line: '[ -f /etc/bash.bashrc ] && . /etc/bash.bashrc'
-        state: present
-        insertafter: BOF
-      loop: "{{ bashrc_files.files }}"
-      loop_control:
-        label: "{{ item.path }}"
-      become: yes
-      become_user: root
-
-    - name: Debug - list /etc/profile.d to confirm file exists
-      command: ls -alh /etc/profile.d/
-      register: profile_d_listing
-
-    - name: Show /etc/profile.d contents
-      debug:
-        var: profile_d_listing.stdout_lines
+        backrefs: yes
