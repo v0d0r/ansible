@@ -33,12 +33,18 @@
         create: yes
         insertafter: EOF
 
-    - name: Find existing users' .bashrc files
+    - name: Find existing users' .bashrc files (recursive)
       find:
         paths: /home
         patterns: ".bashrc"
         file_type: file
+        recurse: yes
+        follow: yes
       register: bashrc_files
+
+    - name: Debug - show found .bashrc files
+      debug:
+        var: bashrc_files.files
 
     - name: Ensure existing users source /etc/bash.bashrc
       lineinfile:
