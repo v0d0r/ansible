@@ -1,26 +1,33 @@
----
 - name: Set bash prompt on servers
   hosts: all
   become: yes
+
   vars:
     bash_prompt: '\u@\h:\w\$ '
 
   tasks:
 
-    - name: Update /etc/profile with custom bash prompt if not already set
+    - name: Copy colorprompt.sh to /etc/profile.d
+      copy:
+        src: files/colorprompt.sh
+        dest: /etc/profile.d/colorprompt.sh
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Ensure /etc/profile sets custom bash prompt if not already present
       lineinfile:
         path: /etc/profile
         regexp: '^export PS1='
         line: "export PS1='{{ bash_prompt }}'"
         state: present
         create: yes
-        backrefs: yes
 
-    - name: Update /etc/skel/.bashrc with custom bash prompt if not already set
+    - name: Ensure /etc/skel/.bashrc sets custom bash prompt if not already present
       lineinfile:
         path: /etc/skel/.bashrc
         regexp: '^export PS1='
         line: "export PS1='{{ bash_prompt }}'"
         state: present
         create: yes
-        backrefs: yes
+
