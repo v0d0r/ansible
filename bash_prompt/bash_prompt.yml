@@ -11,8 +11,6 @@
         owner: root
         group: root
         mode: '0644'
-      become: true
-      become_user: root
 
     - name: Ensure colorprompt is sourced in /etc/bash.bashrc
       lineinfile:
@@ -21,8 +19,6 @@
         state: present
         create: yes
         insertafter: EOF
-      become: true
-      become_user: root
 
     - name: Ensure colorprompt is sourced in /etc/skel/.bashrc
       lineinfile:
@@ -35,17 +31,24 @@
         state: present
         create: yes
         insertafter: EOF
-      become: true
-      become_user: root
+
+    - name: Ensure existing users source /etc/bash.bashrc
+      lineinfile:
+        path: "{{ item.home }}/.bashrc"
+        line: '[ -f /etc/bash.bashrc ] && . /etc/bash.bashrc'
+        state: present
+        insertafter: BOF
+      loop: "{{ ansible_facts['passwd'] | dict2items | selectattr('value.uid', '>=', 1000) | selectattr('key', '!=', 'nobody') | list }}"
+      loop_control:
+        label: "{{ item.key }}"
+      vars:
+        ansible_facts:
+          passwd: "{{ lookup('ansible.builtin.passwd', wantlist=True) | community.general.parse_passwd }}"
 
     - name: Debug - list /etc/profile.d to confirm file exists
       command: ls -alh /etc/profile.d/
       register: profile_d_listing
-      become: true
-      become_user: root
 
     - name: Show /etc/profile.d contents
       debug:
         var: profile_d_listing.stdout_lines
-      become: true
-      become_user: root
