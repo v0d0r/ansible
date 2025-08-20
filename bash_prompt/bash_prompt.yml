@@ -41,7 +41,7 @@
         insertafter: BOF
         create: yes
       with_fileglob:
-        - /home/*
+        - /home/*/.bashrc
       loop_control:
         label: "{{ item }}"
       become: yes
