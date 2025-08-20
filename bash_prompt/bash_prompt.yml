@@ -1,15 +1,15 @@
+---
 - name: Set bash prompt on servers
   hosts: all
   become: yes
-
   vars:
     bash_prompt: '\u@\h:\w\$ '
 
   tasks:
 
-    - name: Copy colorprompt.sh to /etc/profile.d
-      copy:
-        src: files/colorprompt.sh
+    - name: Copy colorprompt.sh from template
+      template:
+        src: colorprompt.sh.j2
         dest: /etc/profile.d/colorprompt.sh
         owner: root
         group: root
@@ -30,4 +30,3 @@
         line: "export PS1='{{ bash_prompt }}'"
         state: present
         create: yes
-
