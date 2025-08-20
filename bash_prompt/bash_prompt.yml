@@ -33,24 +33,28 @@
         create: yes
         insertafter: EOF
 
+    - name: Find existing users' .bashrc files
+      find:
+        paths: /home
+        patterns: ".bashrc"
+        file_type: file
+      register: bashrc_files
+
     - name: Ensure existing users source /etc/bash.bashrc
       lineinfile:
-        path: "{{ item }}"
+        path: "{{ item.path }}"
         line: '[ -f /etc/bash.bashrc ] && . /etc/bash.bashrc'
         state: present
         insertafter: BOF
-      with_fileglob:
-        - /home/*/.bashrc
+      loop: "{{ bashrc_files.files }}"
       loop_control:
-        label: "{{ item }}"
+        label: "{{ item.path }}"
       become: yes
       become_user: root
 
     - name: Debug - list /etc/profile.d to confirm file exists
       command: ls -alh /etc/profile.d/
       register: profile_d_listing
-      become: yes
-      become_user: root
 
     - name: Show /etc/profile.d contents
       debug:
