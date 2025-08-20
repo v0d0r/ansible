@@ -33,26 +33,15 @@
         create: yes
         insertafter: EOF
 
-    - name: Gather all normal users' home directories
-      command: getent passwd
-      register: passwd_entries
-      changed_when: false
-
     - name: Ensure existing users source /etc/bash.bashrc
       lineinfile:
         path: "{{ item }}/.bashrc"
         line: '[ -f /etc/bash.bashrc ] && . /etc/bash.bashrc'
         state: present
         insertafter: BOF
-      loop: >-
-        {{
-          passwd_entries.stdout_lines
-          | map('split', ':')
-          | selectattr('2', 'int', '>=', 1000)
-          | selectattr('0', 'ne', 'nobody')
-          | map('extract', [5])
-          | list
-        }}
+        create: yes
+      with_fileglob:
+        - /home/*
       loop_control:
         label: "{{ item }}"
       become: yes
